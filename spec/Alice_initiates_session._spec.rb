@@ -1,7 +1,7 @@
 require_relative 'helper'
 
 describe 'Alice initiates session' do
-  it 'sends a client token and gets a relay token' do
+  it 'receives a client token and responds with a relay token' do
     client_token = Base64.strict_encode64 RbNaCl::Random.random_bytes 32
     post '/start_session', client_token
 
@@ -12,5 +12,10 @@ describe 'Alice initiates session' do
 
     relay_token, _difficulty = lines
     expect(relay_token.size).to eq 44
+  end
+
+  it 'responds with 400 if there is no client token' do
+    post '/start_session'
+    expect(response.status).to eq 400
   end
 end

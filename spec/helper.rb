@@ -10,7 +10,7 @@ module ExconHelpers
     @excon ||= Excon.new "http://#{HOST}:#{PORT}"
   end
 
-  def post path, body
+  def post path, body = ''
     @response = excon.post path: path, body: body
   end
 
