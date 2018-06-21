@@ -22,9 +22,7 @@ describe 'Alice initiates session' do
   it 'responds with 401 if a client token is invalid' do
     client_token = Base64.strict_encode64 RbNaCl::Random.random_bytes 31
     post '/start_session', client_token
-
     expect(response.status).to eq 401
-
 
     post '/start_session', 'some string'
     expect(response.status).to eq 401
