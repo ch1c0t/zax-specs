@@ -17,6 +17,13 @@ module ExconHelpers
   attr_reader :response
 end
 
+module OtherHelpers
+  def rand_bytes count
+    RbNaCl::Random.random_bytes count
+  end
+end
+
 RSpec.configure do |config|
   config.include ExconHelpers
+  config.include OtherHelpers
 end

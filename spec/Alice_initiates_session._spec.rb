@@ -2,7 +2,7 @@ require_relative 'helper'
 
 describe 'Alice initiates session' do
   it 'receives a client token and responds with a relay token' do
-    client_token = Base64.strict_encode64 RbNaCl::Random.random_bytes 32
+    client_token = Base64.strict_encode64 rand_bytes 32
     post '/start_session', client_token
 
     expect(response.status).to eq 200
@@ -20,7 +20,7 @@ describe 'Alice initiates session' do
   end
 
   it 'responds with 401 if a client token is invalid' do
-    client_token = Base64.strict_encode64 RbNaCl::Random.random_bytes 31
+    client_token = Base64.strict_encode64 rand_bytes 31
     post '/start_session', client_token
     expect(response.status).to eq 401
 
