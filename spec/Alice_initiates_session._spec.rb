@@ -5,7 +5,6 @@ describe 'Alice initiates session' do
     it 'receives a client token and responds with a relay token' do
       client_token = Base64.strict_encode64 rand_bytes 32
       post '/start_session', client_token
-
       expect(response.status).to eq 200
 
       lines = response.body.split "\r\n"
@@ -32,7 +31,27 @@ describe 'Alice initiates session' do
 
   describe '/verify_session' do
     context 'when the difficulty is 0' do
-      it 'checks that h2(client_token, relay_token) is valid'
+      it 'checks that h2(client_token, relay_token) is valid' do
+        client_token = rand_bytes 32
+        post '/start_session', client_token.to_b64
+        expect(response.status).to eq 200
+
+        lines = response.body.split "\r\n"
+        expect(lines.size).to eq 2
+
+        b64_relay_token, difficulty = lines
+        expect(b64_relay_token.size).to eq 44
+        expect(difficulty).to eq '0'
+
+        relay_token = b64_relay_token.from_b64
+        expect(relay_token.size).to eq 32
+        h2_ct = h2 client_token
+        h2_ct_and_rt = h2(client_token + relay_token)
+
+        post '/verify_session', "#{h2_ct.to_b64}\r\n#{h2_ct_and_rt.to_b64}"
+        expect(response.status).to eq 200
+        puts "_sess_pk in base64: #{response.body}"
+      end
     end
 
     context 'when the difficulty is higher than 0' do

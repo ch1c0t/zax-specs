@@ -1,9 +1,10 @@
-require 'base64'
 require 'rbnacl'
 require 'excon'
 
 HOST = '127.0.0.1'
 PORT = 8080
+
+require_relative 'core_ext'
 
 module ExconHelpers
   def excon
@@ -20,6 +21,10 @@ end
 module OtherHelpers
   def rand_bytes count
     RbNaCl::Random.random_bytes count
+  end
+
+  def h2 msg
+    RbNaCl::Hash.sha256 RbNaCl::Hash.sha256 "\0" * 64 + msg
   end
 end
 
