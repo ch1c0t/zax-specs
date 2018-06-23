@@ -50,7 +50,9 @@ describe 'Alice initiates session' do
 
         post '/verify_session', "#{h2_ct.to_b64}\r\n#{h2_ct_and_rt.to_b64}"
         expect(response.status).to eq 200
-        puts "_sess_pk in base64: #{response.body}"
+
+        r_sess_pk = response.body.from_b64
+        expect(r_sess_pk.size).to eq 32
       end
     end
 
