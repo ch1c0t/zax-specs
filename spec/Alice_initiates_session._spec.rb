@@ -42,29 +42,45 @@ describe 'Alice initiates session' do
       expect(response.status).to eq 400
     end
 
+    before do
+      @client_token = rand_bytes 32
+
+      post '/start_session', @client_token.to_b64
+      expect(response.status).to eq 200
+
+      lines = response.body.split "\r\n"
+      expect(lines.size).to eq 2
+
+      b64_relay_token, difficulty = lines
+      expect(b64_relay_token.size).to eq 44
+      expect(difficulty).to eq '0'
+
+      @relay_token = b64_relay_token.from_b64
+      expect(@relay_token.size).to eq 32
+    end
+
     context 'when the difficulty is 0' do
-      it 'checks that h2(client_token, relay_token) is valid' do
-        client_token = rand_bytes 32
-        post '/start_session', client_token.to_b64
-        expect(response.status).to eq 200
+      context 'when a client sends valid h2(client_token, relay_token)' do
+        it 'sends a r_sess_pk key' do
+          h2_ct = h2 @client_token
+          h2_ct_and_rt = h2(@client_token + @relay_token)
 
-        lines = response.body.split "\r\n"
-        expect(lines.size).to eq 2
+          post '/verify_session', "#{h2_ct.to_b64}\r\n#{h2_ct_and_rt.to_b64}"
+          expect(response.status).to eq 200
 
-        b64_relay_token, difficulty = lines
-        expect(b64_relay_token.size).to eq 44
-        expect(difficulty).to eq '0'
+          r_sess_pk = response.body.from_b64
+          expect(r_sess_pk.size).to eq 32
+        end
+      end
 
-        relay_token = b64_relay_token.from_b64
-        expect(relay_token.size).to eq 32
-        h2_ct = h2 client_token
-        h2_ct_and_rt = h2(client_token + relay_token)
+      context 'when a client sends invalid h2(client_token, relay_token)' do
+        it 'responds with 401' do
+          h2_ct = h2 @client_token
+          h2_ct_and_rt = h2(@relay_token + @client_token)
 
-        post '/verify_session', "#{h2_ct.to_b64}\r\n#{h2_ct_and_rt.to_b64}"
-        expect(response.status).to eq 200
-
-        r_sess_pk = response.body.from_b64
-        expect(r_sess_pk.size).to eq 32
+          post '/verify_session', "#{h2_ct.to_b64}\r\n#{h2_ct_and_rt.to_b64}"
+          expect(response.status).to eq 401
+        end
       end
     end
 
