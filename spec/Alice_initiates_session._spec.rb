@@ -30,6 +30,18 @@ describe 'Alice initiates session' do
   end
 
   describe '/verify_session' do
+    it 'responds with 400 to bad requests' do
+      post '/verify_session'
+      expect(response.status).to eq 400
+
+      client_token = Base64.strict_encode64 rand_bytes 31
+      post '/verify_session', client_token
+      expect(response.status).to eq 400
+
+      post '/verify_session', 'some string'
+      expect(response.status).to eq 400
+    end
+
     context 'when the difficulty is 0' do
       it 'checks that h2(client_token, relay_token) is valid' do
         client_token = rand_bytes 32
