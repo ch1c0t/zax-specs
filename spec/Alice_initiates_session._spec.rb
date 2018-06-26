@@ -14,6 +14,17 @@ describe 'Alice initiates session' do
       expect(relay_token.size).to eq 44
     end
 
+    it 'responds with the same relay_token to the same client_token until the handshake attempt expires(1m)' do
+      client_token = rand_bytes(32).to_b64
+      post '/start_session', client_token
+      first_body = response.body
+
+      post '/start_session', client_token
+      second_body = response.body
+
+      expect(first_body).to eq second_body
+    end
+
     it 'responds with 400 if there is no client token' do
       post '/start_session'
       expect(response.status).to eq 400
