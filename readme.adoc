@@ -1,0 +1,15 @@
+[[installation]]
+== Introduction
+
+It is intended to be an executable specification for
+the relay HTTP interface described in
+https://bit.ly/nacl_relay_spec[this paper].
+
+To run the specs:
+
+[source,bash]
+----
+$ bundle exec rspec
+----
+
+It will run the specs against http://127.0.0.1:8080.
